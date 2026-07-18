@@ -1,0 +1,49 @@
+services:
+  # 1. Serviço do Redis
+  - type: web
+    name: redis-waha-n8n
+    env: docker
+    dockerfilePath: Dockerfile.redis
+    plan: free # Mude para pago se precisar de persistência ou mais RAM
+
+  # 2. Serviço do WAHA (WhatsApp HTTP API)
+  - type: web
+    name: waha-service
+    env: docker
+    dockerfilePath: Dockerfile.waha
+    plan: free
+    envVars:
+      - key: WHATSAPP_DEFAULT_ENGINE
+        value: GOWS
+      - key: WHATSAPP_HOOK_EVENTS
+        value: message
+      - key: WAHA_NO_API_KEY
+        value: "true"
+      - key: WAHA_DASHBOARD_NO_PASSWORD
+        value: "true"
+      - key: WHATSAPP_SWAGGER_NO_PASSWORD
+        value: "true"
+      - key: WHATSAPP_HOOK_URL
+        # O Render gera a URL automaticamente. Substitua após o primeiro deploy se necessário.
+        value: http://n8n-service:5678/webhook/webhook 
+
+  # 3. Serviço do n8n
+  - type: web
+    name: n8n-service
+    env: docker
+    dockerfilePath: Dockerfile.n8n
+    plan: free
+    envVars:
+      - key: GENERIC_TIMEZONE
+        value: America/Sao_Paulo
+      - key: N8N_LOG_LEVEL
+        value: debug
+      - key: N8N_SECURE_COOKIE
+        value: "false"
+      - key: N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE
+        value: "true"
+      - key: N8N_HOST
+        value: n8n-service
+      - key: WEBHOOK_URL
+        # Aqui você deve colocar a URL pública gerada pelo Render para o n8n após o deploy
+        value: https://onrender.com 

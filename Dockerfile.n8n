@@ -1,1 +1,16 @@
 FROM n8nio/n8n:latest
+
+USER root
+
+# Instala ferramentas ou pacotes adicionais caso precise no sistema
+RUN apk add --no-cache bash curl
+
+# Garante que a pasta interna de dados do n8n possua as permissões corretas
+RUN mkdir -p /home/node/.n8n && chown -R node:node /home/node/.n8n
+
+USER node
+
+# Porta padrão de escuta do n8n
+EXPOSE 5678
+
+CMD ["n8n", "start"]
